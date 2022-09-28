@@ -3,6 +3,8 @@
 #CXX SOURCE_FILES
 CXX_SOURCES = main.cpp
 CXX_SOURCES += clockconfig.cpp
+CXX_SOURCES += USART/USART.cpp
+CXX_SOURCES += GPIO/GPIO.cpp
 
 #C SOURCE FILES
 #SOURCES  = main.c
@@ -29,6 +31,8 @@ CFLAGS += -mfloat-abi=soft -mfpu=fpv4-sp-d16
 CFLAGS += -DSTM32F40_41xxx
 CFLAGS += -Wl,--gc-sections
 CFLAGS += -I ./Includes
+CFLAGS += -I ./USART
+CFLAGS += -I ./GPIO
 CFLAGS += -I .
 
 all: $(PROJECT).elf
@@ -38,6 +42,7 @@ $(PROJECT).elf: $(CXX_SOURCES)
 	$(CXX) $(CFLAGS) $(CXX_SOURCES) $(SOURCES) -o $@
 	$(OBJCOPY) -O ihex $(PROJECT).elf $(PROJECT).hex
 	$(OBJCOPY) -O binary $(PROJECT).elf $(PROJECT).bin
+	ls -lh $(PROJECT).bin
 
 # remove binary files
 clean:

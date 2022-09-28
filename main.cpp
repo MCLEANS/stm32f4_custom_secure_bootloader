@@ -1,23 +1,48 @@
 #include "stm32f4xx.h"
 #include "clockconfig.h"
+#include "main.h"
+
+#include <USART.h>
+#include <GPIO.h>
 
 custom_libraries::clock_config system_clock;
+custom_libraries::USART serial_port(USART2,USART_PORT,USART_RX,USART_TX,USART_BAUD);
+custom_libraries::_GPIO user_button(USER_BUTTON_PORT, USER_BUTTON_PIN);
 
 int main(void) {
-  
+
+  /* Initialize the bootloader here */
   system_clock.initialize();
-  RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
-  
-  GPIOA->MODER |= GPIO_MODER_MODER7_0;
-  GPIOA->MODER |= GPIO_MODER_MODER6_0;
+  serial_port.initialize();
 
-  GPIOA->ODR |= GPIO_ODR_ODR_6;
-  GPIOA->ODR &= ~GPIO_ODR_ODR_7;  
+  /* Configure user button as input */
+  user_button.pin_mode(custom_libraries::INPUT);
+  user_button.input_state(custom_libraries::PULL_UP);
 
-  while(1){
-    for(volatile int i = 0; i < 2000000; i++){}
-    GPIOA->ODR ^= (1<<6);
-    GPIOA->ODR ^= (1<<7);
-
+  /**
+   * Check whether the user button is pressed 
+   * If pressed execute bootloader commands
+   * If not pressed jump to user application
+  **/
+  if(user_button.digital_read()){
+    /* Button is pressed, perform firmware update */
+    serial_port.println("[Bootloader] - Performing Firmware Update");
+    bootloader_uart_read_data();
   }
+  else{
+    /* Button is not pressed, jump to user application */
+    serial_port.println("[Bootloader] - Jumping to user application");
+    bootloader_jump_to_user_application();
+  }
+ 
+  while(1){}
+}
+
+
+void bootloader_jump_to_user_application(void){
+
+}
+
+void bootloader_uart_read_data(void){
+
 }
