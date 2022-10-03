@@ -32,6 +32,7 @@ int main(void) {
   else{
     /* Button is not pressed, jump to user application */
     serial_port.println("[Bootloader] - Jumping to user application");
+    for(volatile int i = 0; i < 100000; i++){};
     bootloader_jump_to_user_application();
   }
  
@@ -40,9 +41,24 @@ int main(void) {
 
 
 void bootloader_jump_to_user_application(void){
+  /* Create function pointer to hold reset handler address of user application */
+  void(*user_application_reset_handler)(void);
+
+  /* Configure the Main Stack Pointer from reading the base adress of user application flash section (Sector 3)*/
+  uint32_t main_stack_pointer_value = *(volatile uint32_t*)FLASH_SECTOR3_BASE_ADDRESS;
+
+  /* This function comes from CMSIS */
+  __set_MSP(main_stack_pointer_value);
+
+  /* Fetch the reset handler address of the user applicaton, it is stored in (Base address + 4) */
+  uint32_t reset_handler_address =  *(volatile uint32_t*)(FLASH_SECTOR3_BASE_ADDRESS+4);  
+  user_application_reset_handler = (void (*)()) reset_handler_address;
+
+  /* Jump to reset handler of the user application */
+  user_application_reset_handler();
 
 }
 
 void bootloader_uart_read_data(void){
 
-}
+} 

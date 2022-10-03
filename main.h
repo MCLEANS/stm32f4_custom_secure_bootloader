@@ -1,6 +1,8 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
+#define FLASH_SECTOR3_BASE_ADDRESS 0X0800C000
+
 /* SERIAL CONSOLE DEFINES */
 #define USART_PORT GPIOA 
 #define USART_RX   3 
